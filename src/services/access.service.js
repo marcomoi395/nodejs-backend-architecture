@@ -6,6 +6,7 @@ const crypto = require('crypto')
 const {createKeyToken} = require("./keyToken.service");
 const {createTokenPair} = require("../auth/authUtils");
 const {getInfoData} = require("../utils");
+const {BadRequestError, InternalServerError} = require("../core/error.response");
 
 const RoleShop = {
     SHOP: '0001',
@@ -18,19 +19,15 @@ class AccessService {
 
     static signUp = async ({name, email, password}) => {
         try {
+
             // Check if the email is already in use
             const holderShop = await shopModel.findOne({ email }).lean();
             if (holderShop) {
-                return {
-                    code: '40001',
-                    message: 'Shop already exists',
-                    status: 'error'
-                }
+                throw new BadRequestError('Error: Shop already exists');
             }
 
             // Hash the password
             const hashPassword = await bcrypt.hash(password, 10);
-            console.log('hashPassword::', hashPassword)
 
             // Create a new shop
             const newShop = await shopModel.create({
@@ -59,9 +56,6 @@ class AccessService {
                 const publicKey = crypto.randomBytes(64).toString('hex');
                 const privateKey = crypto.randomBytes(64).toString('hex');
 
-                console.log({privateKey, publicKey})
-                console.log({privateKey, publicKey})
-
                 const keyStore = await createKeyToken({
                     userId: newShop._id,
                     publicKey,
@@ -69,16 +63,11 @@ class AccessService {
                 })
 
                 if(!keyStore){
-                    return {
-                        code: 'xxxx',
-                        message: 'Error create keyStore',
-                        status: 'error'
-                    }
+                    throw new InternalServerError('Failed to create keyStore')
                 }
 
                 // create token pair
                 const tokens = await createTokenPair({userId: newShop._id, email}, publicKey, privateKey)
-                console.log('Created Token Success::', tokens)
 
                 return {
                     code: 201,
@@ -94,11 +83,10 @@ class AccessService {
                 metadata: null
             }
         } catch (error) {
-            return {
-                code: 'xxx',
-                message: error.message,
-                status: 'error'
+            if (error instanceof BadRequestError) {
+                throw error;
             }
+            throw new InternalServerError(error.message || 'An unexpected error occurred');
         }
     }
 }
