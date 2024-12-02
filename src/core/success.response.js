@@ -4,38 +4,38 @@ const StatusCode = {
     OK: 200,
     CREATED: 201,
     NO_CONTENT: 204,
-    BAD_REQUEST: 400,
-    UNAUTHORIZED: 401,
-    FORBIDDEN: 403,
-    NOT_FOUND: 404,
-    CONFLICT: 409,
-    INTERNAL_SERVER_ERROR: 500
-}
+};
 
 const ReasonStatusCode = {
-    FORBIDDEN: 'Bad request error',
-    CONFLICT: 'Conflict error',
-}
+    OK: 'Success',
+    CREATED: 'Resource created',
+    NO_CONTENT: 'No content',
+};
 
-class ErrorResponse extends Error {
+class SuccessResponse {
 
-    constructor(message, status) {
-        super(message);
-        this.status = status;
+    constructor({message, statusCode = StatusCode.OK, reasonStatusCode = ReasonStatusCode.OK, metadata = {} }) {
+        this.message = !message ? reasonStatusCode : message;
+        this.status = statusCode
+        this.metadata = metadata
+    }
+
+    send(res, headers = {}){
+        return res.status ( this.status ).json(this)
     }
 }
 
-
-class ConflictRequestError extends ErrorResponse{
-
-    constructor(message = ReasonStatusCode.CONFLICT, status = StatusCode.CONFLICT) {
-        super(message, status);
+class OK extends SuccessResponse {
+    constructor({message, metadata}){
+        super({message, metadata})
     }
 }
 
-class BadRequestError extends ErrorResponse{
-
-    constructor(message = ReasonStatusCode.FORBIDDEN, status = StatusCode.FORBIDDEN) {
-        super(message, status);
+class CREATED extends SuccessResponse {
+    constructor({message, statusCode = StatusCode.CREATED, reasonStatusCode = ReasonStatusCode.CREATED, metadata, options = {}}){
+        super({message, statusCode, reasonStatusCode, metadata})
+        this.options = options
     }
 }
+
+module.exports = {OK, CREATED}
