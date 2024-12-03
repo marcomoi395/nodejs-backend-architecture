@@ -5,8 +5,9 @@ const bcrypt = require('bcrypt');
 const crypto = require('crypto')
 const {createKeyToken} = require("./keyToken.service");
 const {createTokenPair} = require("../auth/authUtils");
-const {getInfoData} = require("../utils");
-const {BadRequestError, InternalServerError} = require("../core/error.response");
+const {getInfoData, getPrivateAndPublicKey} = require("../utils");
+const {BadRequestError, InternalServerError, AuthFailureError} = require("../core/error.response");
+const {findEmail, findByEmail} = require("./shop.service");
 
 const RoleShop = {
     SHOP: '0001',
@@ -17,11 +18,48 @@ const RoleShop = {
 
 class AccessService {
 
+    static login = async ({email, password, refreshToken = null}) => {
+        /*
+        1 - Check email in dbs
+        2 - Check password
+        3 - Create AT vs RT and save
+        4 - Generate token pair
+        5 - Get data return login
+         */
+
+        const foundShop = await findByEmail({email})
+
+        if(!foundShop) {
+            throw new BadRequestError('Error: Shop not found')
+        }
+
+        const match = bcrypt.compare(password, foundShop.password)
+        if(!match) {
+            throw new AuthFailureError('Error: Authentication error')
+        }
+
+        // Create PrivateKey and PublicKey
+        const {privateKey, publicKey} = getPrivateAndPublicKey();
+        console.log("Private Key::", privateKey)
+        console.log("Public Key::", publicKey)
+
+        // Create token pair
+        const tokens = await createTokenPair({userId: foundShop._id, email}, publicKey, privateKey)
+
+        await createKeyToken({userId: foundShop._id, publicKey, privateKey, refreshToken: tokens.refreshToken})
+
+        return {
+            shop: getInfoData({filed: ['_id', 'name', 'email'], object: foundShop}),
+            tokens
+        }
+
+    }
+
     static signUp = async ({name, email, password}) => {
         try {
 
             // Check if the email is already in use
-            const holderShop = await shopModel.findOne({ email }).lean();
+            const holderShop = await shopModel.findOne({email}).lean();
             if (holderShop) {
                 throw new BadRequestError('Error: Shop already exists');
             }
@@ -37,7 +75,7 @@ class AccessService {
                 roles: [RoleShop.SHOP]
             });
 
-            if(newShop){
+            if (newShop) {
                 /*
                 // Generate RSA key pair (PRO)
                 const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', {
@@ -62,7 +100,7 @@ class AccessService {
                     privateKey
                 })
 
-                if(!keyStore){
+                if (!keyStore) {
                     throw new InternalServerError('Failed to create keyStore')
                 }
 
