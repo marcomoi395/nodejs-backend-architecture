@@ -22,14 +22,14 @@ class BadRequestError extends ErrorResponse {
     }
 }
 
-class NotFoundError extends ErrorResponse {
-    constructor(message = ReasonPhrases.NOT_FOUND) {
-        super(message, StatusCodes.NOT_FOUND);
+class AuthFailureError extends ErrorResponse {
+    constructor(message = ReasonPhrases.UNAUTHORIZED, status = StatusCodes.UNAUTHORIZED) {
+        super(message, status);
     }
 }
 
-class AuthFailureError extends ErrorResponse {
-    constructor(message = ReasonPhrases.UNAUTHORIZED, status = StatusCodes.UNAUTHORIZED) {
+class NotFoundError extends ErrorResponse {
+    constructor(message = ReasonPhrases.NOT_FOUND, status = StatusCodes.NOT_FOUND) {
         super(message, status);
     }
 }
