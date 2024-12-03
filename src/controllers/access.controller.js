@@ -1,9 +1,16 @@
 'use strict'
 
-const {signUp, login} = require("../services/access.service");
+const {signUp, login, logout} = require("../services/access.service");
 const {OK, CREATED, SuccessResponse} = require('../core/success.response')
 
 class AccessController {
+
+    logout = async (req, res, next) => {
+        new SuccessResponse({
+            message: 'Logout successfully',
+            metadata: await logout(req.keyStore),
+        }).send(res)
+    }
 
     login = async (req, res, next) => {
         new SuccessResponse({

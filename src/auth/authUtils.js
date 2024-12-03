@@ -2,7 +2,7 @@
 
 const JWT = require('jsonwebtoken')
 const {decode} = require("jsonwebtoken");
-const {asyncHandler} = require("../helper/asyncHandler");
+const asyncHandler = require("../helper/asyncHandler");
 const {AuthFailureError, NotFoundError} = require("../core/error.response");
 const {findByUserId} = require("../services/keyToken.service");
 
@@ -55,6 +55,7 @@ const authentication = asyncHandler( async (req, res, next) => {
 
     const accessToken = req.headers[HEADER.AUTHORIZATION]
     if(!accessToken) throw new AuthFailureError('Invalid Request')
+
     
     try {
         const decodeUser = JWT.verify(accessToken, keyStore.publicKey)

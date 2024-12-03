@@ -3,7 +3,7 @@
 const shopModel = require('../models/shop.model');
 const bcrypt = require('bcrypt');
 const crypto = require('crypto')
-const {createKeyToken} = require("./keyToken.service");
+const {createKeyToken, removeKeyById} = require("./keyToken.service");
 const {createTokenPair} = require("../auth/authUtils");
 const {getInfoData, getPrivateAndPublicKey} = require("../utils");
 const {BadRequestError, InternalServerError, AuthFailureError} = require("../core/error.response");
@@ -17,6 +17,10 @@ const RoleShop = {
 }
 
 class AccessService {
+
+    static logout = async (keyStore) => {
+        return await removeKeyById(keyStore._id)
+    }
 
     static login = async ({email, password, refreshToken = null}) => {
         /*
