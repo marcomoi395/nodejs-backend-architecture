@@ -20,23 +20,17 @@ class AccessService {
     /*
     1 - check this token used?
      */
-    static handleRefreshToken = async (refreshToken) => {
-        const foundToken = await findByRefreshTokenUsed(refreshToken)
+    static handleRefreshToken = async ({refreshToken, user, keyStore}) => {
+        const {userId, email} = user;
 
-        if (foundToken) {
-            const {userId, email} = await verifyJWT(refreshToken, foundToken.privateKey)
-
+        if(keyStore.refreshTokensUsed.includes(refreshToken)) {
             await removeKeyById(userId);
             throw new ForbiddenError('Something went wrong, please login again')
         }
 
-        const holderToken = await findByRefreshToken(refreshToken);
-        if (!holderToken) {
+        if(keyStore.refreshToken !== refreshToken) {
             throw new AuthFailureError('Shop not register')
         }
-
-        // -- Verify JWT --
-        const {userId, email} = await verifyJWT(refreshToken, holderToken.privateKey)
 
         // -- Check UserId --
         const foundShop = await findByEmail({email})
@@ -45,7 +39,7 @@ class AccessService {
         // -- Create New Token --
         const tokens = await createTokenPair({
             userId: foundShop._id, email
-        }, holderToken.publicKey, holderToken.privateKey)
+        }, keyStore.publicKey, keyStore.privateKey)
 
         // -- Update RefreshToken --
         await updateRefreshToken(refreshToken, {
@@ -57,7 +51,7 @@ class AccessService {
         })
 
         return {
-            user: {userId, email}, tokens
+            user, tokens
         }
 
     }
