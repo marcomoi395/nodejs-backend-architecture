@@ -3,21 +3,65 @@
 const shopModel = require('../models/shop.model');
 const bcrypt = require('bcrypt');
 const crypto = require('crypto')
-const {createKeyToken, removeKeyById} = require("./keyToken.service");
-const {createTokenPair} = require("../auth/authUtils");
+const {
+    createKeyToken, removeKeyById, findByRefreshTokenUsed, findByRefreshToken, updateRefreshToken
+} = require("./keyToken.service");
+const {createTokenPair, verifyJWT} = require("../auth/authUtils");
 const {getInfoData, getPrivateAndPublicKey} = require("../utils");
-const {BadRequestError, InternalServerError, AuthFailureError} = require("../core/error.response");
+const {BadRequestError, InternalServerError, AuthFailureError, ForbiddenError} = require("../core/error.response");
 const {findEmail, findByEmail} = require("./shop.service");
 const {CREATED} = require("../core/success.response");
 
 const RoleShop = {
-    SHOP: '0001',
-    WRITER: '0002',
-    EDITOR: '0003',
-    ADMIN: '0004'
+    SHOP: '0001', WRITER: '0002', EDITOR: '0003', ADMIN: '0004'
 }
 
 class AccessService {
+    /*
+    1 - check this token used?
+     */
+    static handleRefreshToken = async (refreshToken) => {
+        const foundToken = await findByRefreshTokenUsed(refreshToken)
+
+        if (foundToken) {
+            const {userId, email} = await verifyJWT(refreshToken, foundToken.privateKey)
+
+            await removeKeyById(userId);
+            throw new ForbiddenError('Something went wrong, please login again')
+        }
+
+        const holderToken = await findByRefreshToken(refreshToken);
+        if (!holderToken) {
+            throw new AuthFailureError('Shop not register')
+        }
+
+        // -- Verify JWT --
+        const {userId, email} = await verifyJWT(refreshToken, holderToken.privateKey)
+
+        // -- Check UserId --
+        const foundShop = await findByEmail({email})
+        if (!foundShop) throw new AuthFailureError('Shop not register 2')
+
+        // -- Create New Token --
+        const tokens = await createTokenPair({
+            userId: foundShop._id, email
+        }, holderToken.publicKey, holderToken.privateKey)
+
+        // -- Update RefreshToken --
+        await updateRefreshToken(refreshToken, {
+            $set: {
+                refreshToken: tokens.refreshToken
+            }, $addToSet: {
+                refreshTokensUsed: refreshToken
+            }
+        })
+
+        return {
+            user: {userId, email}, tokens
+        }
+
+    }
+
 
     static logout = async (keyStore) => {
         return await removeKeyById(keyStore._id)
@@ -54,8 +98,7 @@ class AccessService {
         await createKeyToken({userId: foundShop._id, publicKey, privateKey, refreshToken: tokens.refreshToken})
 
         return {
-            shop: getInfoData({filed: ['_id', 'name', 'email'], object: foundShop}),
-            tokens
+            shop: getInfoData({filed: ['_id', 'name', 'email'], object: foundShop}), tokens
         }
 
     }
@@ -74,10 +117,7 @@ class AccessService {
 
             // Create a new shop
             const newShop = await shopModel.create({
-                name,
-                email,
-                password: hashPassword,
-                roles: [RoleShop.SHOP]
+                name, email, password: hashPassword, roles: [RoleShop.SHOP]
             });
 
             if (newShop) {
@@ -99,9 +139,7 @@ class AccessService {
                 const {privateKey, publicKey} = getPrivateAndPublicKey();
 
                 const keyStore = await createKeyToken({
-                    userId: newShop._id,
-                    publicKey,
-                    privateKey
+                    userId: newShop._id, publicKey, privateKey
                 })
 
                 if (!keyStore) {
@@ -111,17 +149,14 @@ class AccessService {
                 // create token pair
                 const tokens = await createTokenPair({userId: newShop._id, email}, publicKey, privateKey)
                 return {
-                    code: 201,
-                    metadata: {
-                        shop: getInfoData({filed: ['_id', 'name', 'email'], object: newShop}),
-                        tokens
+                    code: 201, metadata: {
+                        shop: getInfoData({filed: ['_id', 'name', 'email'], object: newShop}), tokens
                     }
                 }
             }
 
             return {
-                code: 201,
-                metadata: null
+                code: 201, metadata: null
             }
         } catch (error) {
             throw new InternalServerError(error.message || 'An unexpected error occurred');
