@@ -17,8 +17,8 @@ class ConflictRequestError extends ErrorResponse {
 }
 
 class BadRequestError extends ErrorResponse {
-    constructor(message = ReasonPhrases.BAD_REQUEST) {
-        super(message, StatusCodes.BAD_REQUEST);
+    constructor(message = ReasonPhrases.BAD_REQUEST, status = StatusCodes.BAD_REQUEST) {
+        super(message, status);
     }
 }
 
