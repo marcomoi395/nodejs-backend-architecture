@@ -8,6 +8,7 @@ const {createTokenPair} = require("../auth/authUtils");
 const {getInfoData, getPrivateAndPublicKey} = require("../utils");
 const {BadRequestError, InternalServerError, AuthFailureError} = require("../core/error.response");
 const {findEmail, findByEmail} = require("./shop.service");
+const {CREATED} = require("../core/success.response");
 
 const RoleShop = {
     SHOP: '0001',
@@ -33,19 +34,19 @@ class AccessService {
 
         const foundShop = await findByEmail({email})
 
-        if(!foundShop) {
+        if (!foundShop) {
             throw new BadRequestError('Error: Shop not found')
         }
 
         const match = bcrypt.compare(password, foundShop.password)
-        if(!match) {
+        if (!match) {
             throw new AuthFailureError('Error: Authentication error')
         }
 
         // Create PrivateKey and PublicKey
         const {privateKey, publicKey} = getPrivateAndPublicKey();
-        console.log("Private Key::", privateKey)
-        console.log("Public Key::", publicKey)
+        // console.log("Private Key::", privateKey)
+        // console.log("Public Key::", publicKey)
 
         // Create token pair
         const tokens = await createTokenPair({userId: foundShop._id, email}, publicKey, privateKey)
@@ -95,8 +96,7 @@ class AccessService {
                 })
                 */
 
-                const publicKey = crypto.randomBytes(64).toString('hex');
-                const privateKey = crypto.randomBytes(64).toString('hex');
+                const {privateKey, publicKey} = getPrivateAndPublicKey();
 
                 const keyStore = await createKeyToken({
                     userId: newShop._id,
@@ -110,7 +110,6 @@ class AccessService {
 
                 // create token pair
                 const tokens = await createTokenPair({userId: newShop._id, email}, publicKey, privateKey)
-
                 return {
                     code: 201,
                     metadata: {
@@ -125,9 +124,6 @@ class AccessService {
                 metadata: null
             }
         } catch (error) {
-            if (error instanceof BadRequestError) {
-                throw error;
-            }
             throw new InternalServerError(error.message || 'An unexpected error occurred');
         }
     }
