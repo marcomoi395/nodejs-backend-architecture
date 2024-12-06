@@ -2,6 +2,7 @@
 
 const {product, clothing, electronics} = require('../models/product.model')
 const {BadRequestError, InternalServerError, AuthFailureError, ForbiddenError} = require("../core/error.response");
+const {Types} = require("mongoose");
 
 // define Factory class to create product
 class ProductFactory{
@@ -38,8 +39,8 @@ class Product{
     }
 
     // create new product
-    async createProduct() {
-        return product.create(this)
+    async createProduct( product_id ) {
+        return product.create({...this, _id: product_id})
     }
 }
 
@@ -47,10 +48,10 @@ class Product{
 class Clothing extends Product{
 
     async createProduct() {
-        const newClothing = await clothing.create(this.product_attributes)
+        const newClothing = await clothing.create({...this.product_attributes, product_shop: this.product_shop})
         if(!newClothing) throw new BadRequestError('Clothing not created')
 
-        const newProduct = await super.createProduct()
+        const newProduct = await super.createProduct(newClothing._id)
         if(!newProduct) throw new BadRequestError('Product not created')
 
         return newProduct
@@ -60,10 +61,10 @@ class Clothing extends Product{
 class Electronics extends Product{
 
     async createProduct() {
-        const newElectronics = await clothing.create(this.product_attributes)
+        const newElectronics = await clothing.create({...this.product_attributes, product_shop: this.product_shop})
         if(!newElectronics) throw new BadRequestError('Electronics not created')
 
-        const newProduct = await super.createProduct()
+        const newProduct = await super.createProduct(newElectronics._id)
         if(!newProduct) throw new BadRequestError('Product not created')
 
         return newProduct

@@ -23,9 +23,8 @@ const productSchema = new Schema({
     }, product_attributes: {
         type: Schema.Types.Mixed, required: true
     }
-},{
-    timestamps: true,
-    collection: COLLECTION_NAME
+}, {
+    timestamps: true, collection: COLLECTION_NAME
 })
 
 const clothingSchema = new Schema({
@@ -37,10 +36,11 @@ const clothingSchema = new Schema({
         type: String, required: true
     }, material: {
         type: String, required: true
+    }, product_shop: {
+        type: Schema.Types.ObjectId, ref: 'Shop', required: true
     }
 }, {
-    timestamps: true,
-    collection: 'Clothing'
+    timestamps: true, collection: 'Clothing'
 })
 
 const electronicsSchema = new Schema({
@@ -50,10 +50,11 @@ const electronicsSchema = new Schema({
         type: String, required: true
     }, warranty: {
         type: String, required: true
+    }, product_shop: {
+        type: Schema.Types.ObjectId, ref: 'Shop', required: true
     }
-},{
-    timestamps: true,
-    collection: 'Electronics'
+}, {
+    timestamps: true, collection: 'Electronics'
 })
 
 module.exports = {
