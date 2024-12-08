@@ -9,6 +9,11 @@ const { authentication } = require('../../auth/authUtils');
 // Authentication
 router.use(authentication);
 
-router.post('', asyncHandler(productController.createProduct));
+router.post('/add', asyncHandler(productController.createProduct));
+
+// Query
+router.get('/drafts/all', asyncHandler(productController.getAllDraftsForShop));
 
 module.exports = router;
+
+

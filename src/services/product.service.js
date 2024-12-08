@@ -7,6 +7,7 @@ const {
     AuthFailureError,
     ForbiddenError,
 } = require('../core/error.response');
+const {findAllDraftsForShop} = require('../models/repositories/product.repo')
 const { Types } = require('mongoose');
 
 // define Factory class to create product
@@ -43,6 +44,15 @@ class ProductFactory {
         }
     }
     */
+
+    // Query
+    static async findAllDraftsForShop ({product_shop, limit = 50, skip = 0}){
+        const query = {
+            product_shop, isDraft: true
+        }
+        return await findAllDraftsForShop({query, limit, skip})
+
+    }
 }
 
 // define base product class

@@ -1,10 +1,11 @@
 'use strict';
 
-const { Schema, model } = require('mongoose');
+const {Schema, model} = require('mongoose');
 const slugify = require('slugify');
 
 const DOCUMENT_NAME = 'Product';
 const COLLECTION_NAME = 'Products';
+
 
 const productSchema = new Schema(
     {
@@ -24,6 +25,9 @@ const productSchema = new Schema(
         product_slug: {
             type: String,
             required: true,
+            default: function () {
+                return slugify(this.product_name || 'default-slug', {lower: true});
+            },
         },
         product_image: {
             type: String,
@@ -56,7 +60,7 @@ const productSchema = new Schema(
         },
         product_variations: {
             type: Array,
-            default:  [],
+            default: [],
         },
         isDraft: {
             type: Boolean,
@@ -78,10 +82,13 @@ const productSchema = new Schema(
 );
 
 // Middleware (run before .save() and .create())
-productSchema.pre('save', function (next) {
-    this.product_slug = slugify(this.product_name, {lower: true})
-    next()
-})
+productSchema.pre('findOneAndUpdate', function (next) {
+    const update = this.getUpdate();
+    if (update.product_name) {
+        update.product_slug = slugify(update.product_name, {lower: true});
+    }
+    next();
+});
 
 
 const clothingSchema = new Schema(

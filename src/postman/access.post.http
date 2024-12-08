@@ -54,4 +54,9 @@ x-client-id: 67550c9df31e05bb72690e5f
 x-rtoken-key: {{refreshToken}}
 authorization: {{accessToken}}
 
+> {%
+    client.global.set("accessToken", response.body.metadata.tokens.accessToken);
+    client.global.set("refreshToken", response.body.metadata.tokens.refreshToken);
+%}
+
 

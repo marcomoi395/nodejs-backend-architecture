@@ -1,0 +1,48 @@
+@url_dev=http://localhost:3000/v1/api
+@API_KEY=c32cb1e215cf74d2f0ceba899a19f464d3a1b9a1e3b2ec2fb3154426b8652da3f92c41e83a247bd28bdb87db68169fe03cfd9933baf7a77e1fd914f48fc24887
+
+### Create product
+< {%
+    request.variables.set("accessToken", client.global.get("accessToken"))
+%}
+
+
+POST {{url_dev}}/product/add
+Content-Type: application/json
+x-api-key: {{API_KEY}}
+x-client-id: 67550c9df31e05bb72690e5f
+authorization: {{accessToken}}
+
+{
+  "product_name": "Cotton T-Shirt",
+  "product_price": 19.99,
+  "product_description": "A comfortable cotton T-shirt, perfect for everyday wear.",
+  "product_image": "https://example.com/images/cotton-tshirt.jpg",
+  "product_quantity": 100,
+  "product_type": "Clothing",
+  "product_attributes": {
+    "branch": "Uniqlo",
+    "size": "M",
+    "color": "White",
+    "material": "100% Cotton"
+  },
+  "product_ratingsAverage": 4.7,
+  "product_variations": [
+    { "size": "S", "color": "Black" },
+    { "size": "L", "color": "White" }
+  ],
+  "isDraft": false,
+  "isPublished": true
+}
+
+### Get all drafts for shop
+< {%
+    request.variables.set("accessToken", client.global.get("accessToken"))
+%}
+
+GET {{url_dev}}/product/drafts/all
+x-api-key: {{API_KEY}}
+x-client-id: 67550c9df31e05bb72690e5f
+authorization: {{accessToken}}
+
+
