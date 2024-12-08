@@ -47,7 +47,10 @@ class ProductFactory {
 
     // -- PUT --
     static async publishProduct({product_id, product_shop}) {
-        return await publishProduct({product_id, product_shop})
+        const modifiedCount = await publishProduct({product_id, product_shop})
+        if (modifiedCount === null) throw new BadRequestError('Product not found')
+
+        return modifiedCount
     }
 
     // -- GET (Query) --
