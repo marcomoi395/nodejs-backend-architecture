@@ -1,56 +1,56 @@
-'use strict'
+'use strict';
 
-const {findById} = require("../services/apikey.service");
+const { findById } = require('../services/apikey.service');
 const HEADER = {
     API_KEY: 'x-api-key',
-    AUTHORIZATION: 'authorization'
-}
+    AUTHORIZATION: 'authorization',
+};
 
 const apiKey = async (req, res, next) => {
     try {
-        const key = req.headers[HEADER.API_KEY].toString()
+        const key = req.headers[HEADER.API_KEY].toString();
 
-        if(!key) {
+        if (!key) {
             return res.status(403).json({
-                message: 'Forbidden Error'
-            })
+                message: 'Forbidden Error',
+            });
         }
 
         // check objKey
         const objKey = await findById(key);
 
-        if(!objKey) {
+        if (!objKey) {
             return res.status(403).json({
-                message: 'Forbidden Error'
-            })
+                message: 'Forbidden Error',
+            });
         }
 
-        req.objKey = objKey
+        req.objKey = objKey;
         return next();
-    }catch (e) {
-         console.error("Error Check Auth::", e);
+    } catch (e) {
+        console.error('Error Check Auth::', e);
     }
-}
+};
 
 const permission = (permission) => {
     return (req, res, next) => {
-        if(!req.objKey.permissions){
+        if (!req.objKey.permissions) {
             return res.status(403).json({
-                message: 'Permission denied'
-            })
+                message: 'Permission denied',
+            });
         }
 
-        console.log('Permission::', req.objKey.permissions)
-        const validPermissions = req.objKey.permissions.includes(permission)
+        console.log('Permission::', req.objKey.permissions);
+        const validPermissions = req.objKey.permissions.includes(permission);
 
-        if(!validPermissions) {
+        if (!validPermissions) {
             return res.status(403).json({
-                message: 'Permission denied'
-            })
+                message: 'Permission denied',
+            });
         }
 
         return next();
-    }
-}
+    };
+};
 
-module.exports = {apiKey, permission}
+module.exports = { apiKey, permission };

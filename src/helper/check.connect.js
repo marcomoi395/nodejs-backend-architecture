@@ -1,15 +1,15 @@
-'use strict'
+'use strict';
 
 // -- Check how many connections the system has? --
-const mongoose = require('mongoose')
+const mongoose = require('mongoose');
 const countConnect = () => {
     const numConnect = mongoose.connections.length;
-    console.log(`Number of connections::${numConnect}`)
-}
+    console.log(`Number of connections::${numConnect}`);
+};
 
 // -- Check over load database --
-const os = require("os");
-const _SECONDS = 5000
+const os = require('os');
+const _SECONDS = 5000;
 const checkOverload = () => {
     setInterval(() => {
         const numConnect = mongoose.connections.length;
@@ -19,13 +19,15 @@ const checkOverload = () => {
         // Example maxium number of connections based on numbers of cores
         const maxConenctions = numCore * 5;
 
-        console.log('Actice connections::', numConnect)
-        console.log(`Memory usage::${memoryUsage / 1024 / 1024} MB`)
+        console.log('Actice connections::', numConnect);
+        console.log(`Memory usage::${memoryUsage / 1024 / 1024} MB`);
 
         if (numConnect > maxConenctions) {
-            console.log(`Warning: Overload database, number of connections::${numConnect}`)
+            console.log(
+                `Warning: Overload database, number of connections::${numConnect}`
+            );
         }
-    }, _SECONDS) // Monitor every 5 seconds
-}
+    }, _SECONDS); // Monitor every 5 seconds
+};
 
-module.exports = {countConnect, checkOverload}
+module.exports = { countConnect, checkOverload };

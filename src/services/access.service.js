@@ -1,67 +1,86 @@
-'use strict'
+'use strict';
 
 const shopModel = require('../models/shop.model');
 const bcrypt = require('bcrypt');
-const crypto = require('crypto')
+const crypto = require('crypto');
 const {
-    createKeyToken, removeKeyById, findByRefreshTokenUsed, findByRefreshToken, updateRefreshToken
-} = require("./keyToken.service");
-const {createTokenPair, verifyJWT} = require("../auth/authUtils");
-const {getInfoData, getPrivateAndPublicKey} = require("../utils");
-const {BadRequestError, InternalServerError, AuthFailureError, ForbiddenError} = require("../core/error.response");
-const {findEmail, findByEmail} = require("./shop.service");
-const {CREATED} = require("../core/success.response");
+    createKeyToken,
+    removeKeyById,
+    findByRefreshTokenUsed,
+    findByRefreshToken,
+    updateRefreshToken,
+} = require('./keyToken.service');
+const { createTokenPair, verifyJWT } = require('../auth/authUtils');
+const { getInfoData, getPrivateAndPublicKey } = require('../utils');
+const {
+    BadRequestError,
+    InternalServerError,
+    AuthFailureError,
+    ForbiddenError,
+} = require('../core/error.response');
+const { findEmail, findByEmail } = require('./shop.service');
+const { CREATED } = require('../core/success.response');
 
 const RoleShop = {
-    SHOP: '0001', WRITER: '0002', EDITOR: '0003', ADMIN: '0004'
-}
+    SHOP: '0001',
+    WRITER: '0002',
+    EDITOR: '0003',
+    ADMIN: '0004',
+};
 
 class AccessService {
     /*
     1 - check this token used?
      */
-    static handleRefreshToken = async ({refreshToken, user, keyStore}) => {
-        const {userId, email} = user;
+    static handleRefreshToken = async ({ refreshToken, user, keyStore }) => {
+        const { userId, email } = user;
 
-        if(keyStore.refreshTokensUsed.includes(refreshToken)) {
+        if (keyStore.refreshTokensUsed.includes(refreshToken)) {
             await removeKeyById(userId);
-            throw new ForbiddenError('Something went wrong, please login again')
+            throw new ForbiddenError(
+                'Something went wrong, please login again'
+            );
         }
 
-        if(keyStore.refreshToken !== refreshToken) {
-            throw new AuthFailureError('Shop not register')
+        if (keyStore.refreshToken !== refreshToken) {
+            throw new AuthFailureError('Shop not register');
         }
 
         // -- Check UserId --
-        const foundShop = await findByEmail({email})
-        if (!foundShop) throw new AuthFailureError('Shop not register 2')
+        const foundShop = await findByEmail({ email });
+        if (!foundShop) throw new AuthFailureError('Shop not register 2');
 
         // -- Create New Token --
-        const tokens = await createTokenPair({
-            userId: foundShop._id, email
-        }, keyStore.publicKey, keyStore.privateKey)
+        const tokens = await createTokenPair(
+            {
+                userId: foundShop._id,
+                email,
+            },
+            keyStore.publicKey,
+            keyStore.privateKey
+        );
 
         // -- Update RefreshToken --
         await updateRefreshToken(refreshToken, {
             $set: {
-                refreshToken: tokens.refreshToken
-            }, $addToSet: {
-                refreshTokensUsed: refreshToken
-            }
-        })
+                refreshToken: tokens.refreshToken,
+            },
+            $addToSet: {
+                refreshTokensUsed: refreshToken,
+            },
+        });
 
         return {
-            user, tokens
-        }
-
-    }
-
+            user,
+            tokens,
+        };
+    };
 
     static logout = async (keyStore) => {
-        return await removeKeyById(keyStore._id)
-    }
+        return await removeKeyById(keyStore._id);
+    };
 
-    static login = async ({email, password, refreshToken = null}) => {
+    static login = async ({ email, password, refreshToken = null }) => {
         /*
         1 - Check email in dbs
         2 - Check password
@@ -70,38 +89,49 @@ class AccessService {
         5 - Get data return login
          */
 
-        const foundShop = await findByEmail({email})
+        const foundShop = await findByEmail({ email });
 
         if (!foundShop) {
-            throw new BadRequestError('Error: Shop not found')
+            throw new BadRequestError('Error: Shop not found');
         }
 
-        const match = bcrypt.compare(password, foundShop.password)
+        const match = bcrypt.compare(password, foundShop.password);
         if (!match) {
-            throw new AuthFailureError('Error: Authentication error')
+            throw new AuthFailureError('Error: Authentication error');
         }
 
         // Create PrivateKey and PublicKey
-        const {privateKey, publicKey} = getPrivateAndPublicKey();
+        const { privateKey, publicKey } = getPrivateAndPublicKey();
         // console.log("Private Key::", privateKey)
         // console.log("Public Key::", publicKey)
 
         // Create token pair
-        const tokens = await createTokenPair({userId: foundShop._id, email}, publicKey, privateKey)
+        const tokens = await createTokenPair(
+            { userId: foundShop._id, email },
+            publicKey,
+            privateKey
+        );
 
-        await createKeyToken({userId: foundShop._id, publicKey, privateKey, refreshToken: tokens.refreshToken})
+        await createKeyToken({
+            userId: foundShop._id,
+            publicKey,
+            privateKey,
+            refreshToken: tokens.refreshToken,
+        });
 
         return {
-            shop: getInfoData({filed: ['_id', 'name', 'email'], object: foundShop}), tokens
-        }
+            shop: getInfoData({
+                filed: ['_id', 'name', 'email'],
+                object: foundShop,
+            }),
+            tokens,
+        };
+    };
 
-    }
-
-    static signUp = async ({name, email, password}) => {
+    static signUp = async ({ name, email, password }) => {
         try {
-
             // Check if the email is already in use
-            const holderShop = await shopModel.findOne({email}).lean();
+            const holderShop = await shopModel.findOne({ email }).lean();
             if (holderShop) {
                 throw new BadRequestError('Error: Shop already exists');
             }
@@ -111,7 +141,10 @@ class AccessService {
 
             // Create a new shop
             const newShop = await shopModel.create({
-                name, email, password: hashPassword, roles: [RoleShop.SHOP]
+                name,
+                email,
+                password: hashPassword,
+                roles: [RoleShop.SHOP],
             });
 
             if (newShop) {
@@ -130,33 +163,46 @@ class AccessService {
                 })
                 */
 
-                const {privateKey, publicKey} = getPrivateAndPublicKey();
+                const { privateKey, publicKey } = getPrivateAndPublicKey();
 
                 const keyStore = await createKeyToken({
-                    userId: newShop._id, publicKey, privateKey
-                })
+                    userId: newShop._id,
+                    publicKey,
+                    privateKey,
+                });
 
                 if (!keyStore) {
-                    throw new InternalServerError('Failed to create keyStore')
+                    throw new InternalServerError('Failed to create keyStore');
                 }
 
                 // create token pair
-                const tokens = await createTokenPair({userId: newShop._id, email}, publicKey, privateKey)
+                const tokens = await createTokenPair(
+                    { userId: newShop._id, email },
+                    publicKey,
+                    privateKey
+                );
                 return {
-                    code: 201, metadata: {
-                        shop: getInfoData({filed: ['_id', 'name', 'email'], object: newShop}), tokens
-                    }
-                }
+                    code: 201,
+                    metadata: {
+                        shop: getInfoData({
+                            filed: ['_id', 'name', 'email'],
+                            object: newShop,
+                        }),
+                        tokens,
+                    },
+                };
             }
 
             return {
-                code: 201, metadata: null
-            }
+                code: 201,
+                metadata: null,
+            };
         } catch (error) {
-            throw new InternalServerError(error.message || 'An unexpected error occurred');
+            throw new InternalServerError(
+                error.message || 'An unexpected error occurred'
+            );
         }
-    }
+    };
 }
 
 module.exports = AccessService;
-

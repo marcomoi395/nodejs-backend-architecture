@@ -1,4 +1,4 @@
-'use strict'
+'use strict';
 /*
 -- Level 0 --
 const mongoose = require('mongoose');
@@ -15,12 +15,13 @@ if (1 === 1) {
 
 // -- PRO (Recommend)
 const mongoose = require('mongoose');
-const {countConnect} = require('../helper/check.connect')
-const {db: {host, name, port}} = require('../configs/config.mongodb')
+const { countConnect } = require('../helper/check.connect');
+const {
+    db: { host, name, port },
+} = require('../configs/config.mongodb');
 const connectString = `mongodb://${host}:${port}/${name}`;
 
 class Database {
-
     constructor() {
         this.connect();
     }
@@ -28,13 +29,16 @@ class Database {
     // Connect
     connect(type = 'mongodb') {
         if (1 === 1) {
-            mongoose.set('debug', true)
-            mongoose.set('debug', {color: true})
+            mongoose.set('debug', true);
+            mongoose.set('debug', { color: true });
         }
 
-        mongoose.connect(connectString, {maxPoolSize: 50}).then(_ => {
-            console.log('Connected to MongoDB', countConnect())
-        }).catch(err => console.error(err));
+        mongoose
+            .connect(connectString, { maxPoolSize: 50 })
+            .then((_) => {
+                console.log('Connected to MongoDB', countConnect());
+            })
+            .catch((err) => console.error(err));
     }
 
     static getInstance() {
