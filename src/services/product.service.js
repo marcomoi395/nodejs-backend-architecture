@@ -7,7 +7,7 @@ const {
     AuthFailureError,
     ForbiddenError,
 } = require('../core/error.response');
-const {findAllDraftsForShop} = require('../models/repositories/product.repo')
+const {findAllDraftsForShop, findAllPublishedForShop, publishProduct} = require('../models/repositories/product.repo')
 const { Types } = require('mongoose');
 
 // define Factory class to create product
@@ -45,12 +45,25 @@ class ProductFactory {
     }
     */
 
-    // Query
+    // -- PUT --
+    static async publishProduct({product_id, product_shop}) {
+        return await publishProduct({product_id, product_shop})
+    }
+
+    // -- GET (Query) --
     static async findAllDraftsForShop ({product_shop, limit = 50, skip = 0}){
         const query = {
             product_shop, isDraft: true
         }
         return await findAllDraftsForShop({query, limit, skip})
+
+    }
+
+    static async findAllPublishedForShop ({product_shop, limit = 50, skip = 0}){
+        const query = {
+            product_shop, isPublished: true
+        }
+        return await findAllPublishedForShop({query, limit, skip})
 
     }
 }

@@ -45,4 +45,30 @@ x-api-key: {{API_KEY}}
 x-client-id: 67550c9df31e05bb72690e5f
 authorization: {{accessToken}}
 
+### Get all published for shop
+< {%
+    request.variables.set("accessToken", client.global.get("accessToken"))
+%}
+
+GET {{url_dev}}/product/published/all
+x-api-key: {{API_KEY}}
+x-client-id: 67550c9df31e05bb72690e5f
+authorization: {{accessToken}}
+
+
+### Change product status to publish
+@id=6755a8b537cbabf7227e49b8
+
+< {%
+    request.variables.set("accessToken", client.global.get("accessToken"))
+%}
+
+PUT {{url_dev}}/product/publish/{{id}}
+x-api-key: {{API_KEY}}
+x-client-id: 67550c9df31e05bb72690e5f
+authorization: {{accessToken}}
+
+
+
+
 

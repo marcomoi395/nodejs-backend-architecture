@@ -1,6 +1,6 @@
 'use strict';
 
-const { createProduct, findAllDraftsForShop } = require('../services/product.service');
+const { createProduct, findAllDraftsForShop, findAllPublishedForShop, publishProduct} = require('../services/product.service');
 const { SuccessResponse } = require('../core/success.response');
 
 class ProductController {
@@ -15,7 +15,18 @@ class ProductController {
         }).send(res);
     };
 
-    // -- Query --
+    // -- PUT --
+    changeProductStatus = async (req, res, next) => {
+        new SuccessResponse({
+            message: 'Change product status successfully',
+            metadata: await publishProduct({
+                product_id: req.params.id,
+                product_shop: req.user.userId,
+            }),
+        }).send(res);
+    }
+
+    // -- GET (Query) --
     /*
     * @description Get all drafts for shop
     * @param {Number} limit
@@ -26,6 +37,13 @@ class ProductController {
         new SuccessResponse({
             message: 'Get all drafts successfully',
             metadata: await findAllDraftsForShop({product_shop: req.user.userId}),
+        }).send(res);
+    }
+
+    getAllPublishedForShop = async (req, res, next) => {
+        new SuccessResponse({
+            message: 'Get all published successfully',
+            metadata: await findAllPublishedForShop({product_shop: req.user.userId}),
         }).send(res);
     }
 }
