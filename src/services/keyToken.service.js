@@ -1,15 +1,10 @@
 'use strict';
 
 const keyTokenModel = require('../models/keytoken.model');
-const { Types } = require('mongoose');
+const {Types} = require('mongoose');
 
 class KeyTokenService {
-    static createKeyToken = async ({
-        userId,
-        publicKey,
-        privateKey,
-        refreshToken,
-    }) => {
+    static createKeyToken = async ({userId, publicKey, privateKey, refreshToken}) => {
         try {
             /*
             level 0
@@ -23,14 +18,14 @@ class KeyTokenService {
             */
 
             // level xxx
-            const filter = { user: userId },
+            const filter = {user: userId},
                 update = {
                     publicKey,
                     privateKey,
                     refreshTokensUsed: [],
                     refreshToken,
                 },
-                options = { upsert: true, new: true };
+                options = {upsert: true, new: true};
 
             const tokens = await keyTokenModel.findOneAndUpdate(
                 filter,
@@ -44,31 +39,28 @@ class KeyTokenService {
         }
     };
 
-    static findByUserId = async (userId) => {
-        return await keyTokenModel
-            .findOne({ user: new Types.ObjectId(userId) })
+    static findByUserId = async (userId) =>
+        await keyTokenModel
+            .findOne({user: new Types.ObjectId(userId)})
             .lean();
-    };
 
-    static removeKeyById = async (id) => {
-        return await keyTokenModel
-            .deleteOne({ user: new Types.ObjectId(id) })
+    static removeKeyById = async (id) =>
+        await keyTokenModel
+            .deleteOne({_id: id})
             .lean();
-    };
 
-    static findByRefreshTokenUsed = async (refreshToken) => {
-        return await keyTokenModel
-            .findOne({ refreshTokensUsed: refreshToken })
+    static findByRefreshTokenUsed = async (refreshToken) =>
+        await keyTokenModel
+            .findOne({refreshTokensUsed: refreshToken})
             .lean();
-    };
 
-    static findByRefreshToken = async (refreshToken) => {
-        return await keyTokenModel.findOne({ refreshToken }).lean();
-    };
+    static findByRefreshToken = async (refreshToken) =>
+        await keyTokenModel.findOne({refreshToken}).lean();
 
-    static updateRefreshToken = async (refreshToken, payload) => {
-        return await keyTokenModel.updateOne({ refreshToken }, payload).lean();
-    };
+
+    static updateRefreshToken = async (refreshToken, payload) =>
+        await keyTokenModel.updateOne({refreshToken}, payload).lean();
+
 }
 
 module.exports = KeyTokenService;
