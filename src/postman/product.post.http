@@ -80,6 +80,12 @@ x-client-id: 67550c9df31e05bb72690e5f
 authorization: {{accessToken}}
 
 
+### Search product
+
+GET {{url_dev}}/product/search?keyword=Cotton
+x-api-key: {{API_KEY}}
+
+
 
 
 

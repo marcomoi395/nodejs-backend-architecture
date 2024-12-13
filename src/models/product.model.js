@@ -81,6 +81,9 @@ const productSchema = new Schema(
     }
 );
 
+// Create index for search
+productSchema.index({product_name: 'text', product_description: 'text'});
+
 // Middleware (run before .save() and .create())
 productSchema.pre('findOneAndUpdate', function (next) {
     const update = this.getUpdate();

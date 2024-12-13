@@ -1,14 +1,13 @@
 'use strict';
 
-const { product, clothing, electronics } = require('../models/product.model');
+const {product, clothing, electronics} = require('../models/product.model');
 const {
-    BadRequestError,
-    InternalServerError,
-    AuthFailureError,
-    ForbiddenError,
+    BadRequestError, InternalServerError, AuthFailureError, ForbiddenError,
 } = require('../core/error.response');
-const {findAllDraftsForShop, findAllPublishedForShop, publishProduct, unPublishProduct} = require('../models/repositories/product.repo')
-const { Types } = require('mongoose');
+const {
+    findAllDraftsForShop, findAllPublishedForShop, publishProduct, unPublishProduct, searchProductByUser
+} = require('../models/repositories/product.repo')
+const {Types} = require('mongoose');
 
 // define Factory class to create product
 class ProductFactory {
@@ -25,8 +24,7 @@ class ProductFactory {
 
     static async createProduct(type, payload) {
         const productClass = ProductFactory.productRegister[type];
-        if (!productClass)
-            throw new BadRequestError(`Invalid product type ${type}`);
+        if (!productClass) throw new BadRequestError(`Invalid product type ${type}`);
 
         return new productClass(payload).createProduct();
     }
@@ -61,35 +59,39 @@ class ProductFactory {
     }
 
     // -- GET (Query) --
-    static async findAllDraftsForShop ({product_shop, limit = 50, skip = 0}){
+    static async findAllDraftsForShop({product_shop, limit = 50, skip = 0}) {
         const query = {
             product_shop, isDraft: true
         }
         return await findAllDraftsForShop({query, limit, skip})
-
     }
 
-    static async findAllPublishedForShop ({product_shop, limit = 50, skip = 0}){
+    static async findAllPublishedForShop({product_shop, limit = 50, skip = 0}) {
         const query = {
             product_shop, isPublished: true
         }
         return await findAllPublishedForShop({query, limit, skip})
+    }
 
+    static async searchProductByUser({keyword}) {
+        console.log(keyword)
+
+        return await searchProductByUser({keyword})
     }
 }
 
 // define base product class
 class Product {
     constructor({
-        product_name,
-        product_price,
-        product_description,
-        product_image,
-        product_quantity,
-        product_type,
-        product_shop,
-        product_attributes,
-    }) {
+                    product_name,
+                    product_price,
+                    product_description,
+                    product_image,
+                    product_quantity,
+                    product_type,
+                    product_shop,
+                    product_attributes,
+                }) {
         this.product_name = product_name;
         this.product_price = product_price;
         this.product_description = product_description;
@@ -102,7 +104,7 @@ class Product {
 
     // create new product
     async createProduct(product_id) {
-        return product.create({ ...this, _id: product_id });
+        return product.create({...this, _id: product_id});
     }
 }
 
@@ -110,8 +112,7 @@ class Product {
 class Clothing extends Product {
     async createProduct() {
         const newClothing = await clothing.create({
-            ...this.product_attributes,
-            product_shop: this.product_shop,
+            ...this.product_attributes, product_shop: this.product_shop,
         });
         if (!newClothing) throw new BadRequestError('Clothing not created');
 
@@ -125,11 +126,9 @@ class Clothing extends Product {
 class Electronics extends Product {
     async createProduct() {
         const newElectronics = await clothing.create({
-            ...this.product_attributes,
-            product_shop: this.product_shop,
+            ...this.product_attributes, product_shop: this.product_shop,
         });
-        if (!newElectronics)
-            throw new BadRequestError('Electronics not created');
+        if (!newElectronics) throw new BadRequestError('Electronics not created');
 
         const newProduct = await super.createProduct(newElectronics._id);
         if (!newProduct) throw new BadRequestError('Product not created');
