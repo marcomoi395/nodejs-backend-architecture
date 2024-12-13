@@ -35,5 +35,21 @@ const publishProduct = async ({product_id, product_shop}) => {
     return modifiedCount
 }
 
+const unPublishProduct = async ({product_id, product_shop}) => {
+    const foundProduct = await product.findOne({
+        product_shop, _id: new Types.ObjectId(product_id)
+    })
 
-module.exports = {findAllDraftsForShop, publishProduct, findAllPublishedForShop}
+    if(!foundProduct) return null
+
+    // Use updateOne to update the found document
+    const { modifiedCount } = await product.updateOne(
+        { _id: foundProduct._id },
+        { $set: { isDraft: true, isPublished: false } }
+    )
+
+    return modifiedCount
+}
+
+
+module.exports = {findAllDraftsForShop, publishProduct, findAllPublishedForShop, unPublishProduct}

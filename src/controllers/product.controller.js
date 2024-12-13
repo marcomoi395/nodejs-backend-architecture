@@ -1,6 +1,6 @@
 'use strict';
 
-const { createProduct, findAllDraftsForShop, findAllPublishedForShop, publishProduct} = require('../services/product.service');
+const { createProduct, findAllDraftsForShop, findAllPublishedForShop, publishProduct, unPublishProduct} = require('../services/product.service');
 const { SuccessResponse } = require('../core/success.response');
 
 class ProductController {
@@ -15,11 +15,21 @@ class ProductController {
         }).send(res);
     };
 
-    // -- PUT --
-    changeProductStatus = async (req, res, next) => {
+    // -- PATCH --
+    publishProduct = async (req, res, next) => {
         new SuccessResponse({
             message: 'Change product status successfully',
             metadata: await publishProduct({
+                product_id: req.params.id,
+                product_shop: req.user.userId,
+            }),
+        }).send(res);
+    }
+
+    unPublishProduct = async (req, res, next) => {
+        new SuccessResponse({
+            message: 'Change product status successfully',
+            metadata: await unPublishProduct({
                 product_id: req.params.id,
                 product_shop: req.user.userId,
             }),

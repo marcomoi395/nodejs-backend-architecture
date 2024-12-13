@@ -7,7 +7,7 @@ const {
     AuthFailureError,
     ForbiddenError,
 } = require('../core/error.response');
-const {findAllDraftsForShop, findAllPublishedForShop, publishProduct} = require('../models/repositories/product.repo')
+const {findAllDraftsForShop, findAllPublishedForShop, publishProduct, unPublishProduct} = require('../models/repositories/product.repo')
 const { Types } = require('mongoose');
 
 // define Factory class to create product
@@ -48,6 +48,13 @@ class ProductFactory {
     // -- PUT --
     static async publishProduct({product_id, product_shop}) {
         const modifiedCount = await publishProduct({product_id, product_shop})
+        if (modifiedCount === null) throw new BadRequestError('Product not found')
+
+        return modifiedCount
+    }
+
+    static async unPublishProduct({product_id, product_shop}) {
+        const modifiedCount = await unPublishProduct({product_id, product_shop})
         if (modifiedCount === null) throw new BadRequestError('Product not found')
 
         return modifiedCount

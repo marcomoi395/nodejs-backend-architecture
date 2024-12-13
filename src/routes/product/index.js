@@ -10,7 +10,8 @@ const { authentication } = require('../../auth/authUtils');
 router.use(authentication);
 
 router.post('/add', asyncHandler(productController.createProduct));
-router.put('/publish/:id', asyncHandler(productController.changeProductStatus));
+router.patch('/publish/:id', asyncHandler(productController.publishProduct));
+router.patch('/unpublish/:id', asyncHandler(productController.unPublishProduct));
 
 // Query
 router.get('/drafts/all', asyncHandler(productController.getAllDraftsForShop));
