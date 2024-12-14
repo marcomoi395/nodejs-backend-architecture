@@ -15,7 +15,7 @@ x-client-id: 67550c9df31e05bb72690e5f
 authorization: {{accessToken}}
 
 {
-  "product_name": "Cotton T-Shirt",
+  "product_name": "Cotton T-Shirt 3",
   "product_price": 19.99,
   "product_description": "A comfortable cotton T-shirt, perfect for everyday wear.",
   "product_image": "https://example.com/images/cotton-tshirt.jpg",
@@ -81,9 +81,20 @@ authorization: {{accessToken}}
 
 
 ### Search product
-
 GET {{url_dev}}/product/search?keyword=Cotton
 x-api-key: {{API_KEY}}
+
+
+### Find all products
+GET {{url_dev}}/product/
+x-api-key: {{API_KEY}}
+
+
+### Find product
+GET {{url_dev}}/product/6755a8b537cbabf7227e49b8
+x-api-key: {{API_KEY}}
+
+
 
 
 

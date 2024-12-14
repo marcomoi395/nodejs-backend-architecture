@@ -1,6 +1,6 @@
 'use strict';
 
-const { createProduct, findAllDraftsForShop, findAllPublishedForShop, publishProduct, unPublishProduct, searchProductByUser} = require('../services/product.service');
+const { createProduct, findAllDraftsForShop, findAllPublishedForShop, publishProduct, unPublishProduct, searchProductByUser, findAllProduct, findProduct} = require('../services/product.service');
 const { SuccessResponse } = require('../core/success.response');
 class ProductController {
     createProduct = async (req, res, next) => {
@@ -60,6 +60,20 @@ class ProductController {
         new SuccessResponse({
             message: 'Search product successfully',
             metadata: await searchProductByUser({keyword: req.query.keyword}),
+        }).send(res);
+    }
+
+    findAllProduct = async (req, res, next) => {
+        new SuccessResponse({
+            message: 'Find all product successfully',
+            metadata: await findAllProduct(req.query),
+        }).send(res);
+    }
+
+    findProduct = async (req, res, next) => {
+        new SuccessResponse({
+            message: 'Find product successfully',
+            metadata: await findProduct({product_id: req.params.id}),
         }).send(res);
     }
 }
