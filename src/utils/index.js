@@ -3,7 +3,7 @@
 const _ = require('lodash');
 const crypto = require('node:crypto');
 
-const getInfoData = ({ filed = [], object = {} }) => {
+const getInfoData = ({filed = [], object = {}}) => {
     return _.pick(object, filed);
 };
 
@@ -22,9 +22,53 @@ const unGetSelectData = (unSelect = []) => {
     return Object.fromEntries(unSelect.map(el => [el, 0]))
 }
 
+const removeUndefined = obj => {
+    Object.keys(obj).forEach(key => {
+        if (obj[key] === null || obj[key] === undefined) {
+            delete obj[key];
+        }
+    })
+
+    return obj
+}
+
+/* Nested Object Parser
+[1]::
+{
+    a: {
+        b: {
+            c: 1
+        }
+    }
+}
+
+[2]::
+{
+    'a.b.c': 1
+}
+ */
+const updateNestedObjectParser = (obj) => {
+    const final = {};
+
+    Object.keys(obj).forEach(key => {
+        if (typeof obj[key] === 'object' && !Array.isArray(obj[key])) {
+            const response = updateNestedObjectParser(obj[key]);
+            Object.keys(response).forEach(subKey => {
+                final[`${key}.${subKey}`] = response[subKey];
+            });
+        } else {
+            final[key] = obj[key];
+        }
+    });
+
+    return final;
+};
+
 module.exports = {
     getInfoData,
     getPrivateAndPublicKey,
     getSelectData,
-    unGetSelectData
+    unGetSelectData,
+    removeUndefined,
+    updateNestedObjectParser
 };

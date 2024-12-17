@@ -36,6 +36,27 @@ authorization: {{accessToken}}
   "isPublished": true
 }
 
+### Update product
+< {%
+    request.variables.set("accessToken", client.global.get("accessToken"))
+%}
+
+
+PATCH {{url_dev}}/product/6755a8b537cbabf7227e49b8
+Content-Type: application/json
+x-api-key: {{API_KEY}}
+x-client-id: 67550c9df31e05bb72690e5f
+authorization: {{accessToken}}
+
+{
+  "product_name": "Cotton T-Shirt 7",
+  "product_price": 109.99,
+  "product_type": "Clothing",
+  "product_attributes": {
+    "branch": "Uniqlo 11"
+  }
+}
+
 ### Get all drafts for shop
 < {%
     request.variables.set("accessToken", client.global.get("accessToken"))

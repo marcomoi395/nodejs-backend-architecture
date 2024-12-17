@@ -5,9 +5,11 @@ const {
     BadRequestError, InternalServerError, AuthFailureError, ForbiddenError,
 } = require('../core/error.response');
 const {
-    findAllDraftsForShop, findAllPublishedForShop, publishProduct, unPublishProduct, searchProductByUser, findAllProduct, findProduct
+    findAllDraftsForShop, findAllPublishedForShop, publishProduct, unPublishProduct, searchProductByUser, findAllProduct, findProduct,
+    updateProductById
 } = require('../models/repositories/product.repo')
 const {Types} = require('mongoose');
+const {removeUndefined, updateNestedObjectParser} = require("../utils");
 
 // define Factory class to create product
 class ProductFactory {
@@ -27,6 +29,13 @@ class ProductFactory {
         if (!productClass) throw new BadRequestError(`Invalid product type ${type}`);
 
         return new productClass(payload).createProduct();
+    }
+
+    static async updateProduct(type, productId, payload) {
+        const productClass = ProductFactory.productRegister[type];
+        if (!productClass) throw new BadRequestError(`Invalid product type ${type}`);
+
+        return new productClass(payload).updateProduct(productId);
     }
 
     /* -- Only user Factory Pattern --
@@ -74,11 +83,8 @@ class ProductFactory {
     }
 
     static async searchProductByUser({keyword}) {
-        console.log(keyword)
-
         return await searchProductByUser({keyword})
     }
-
 
     static async findAllProduct({limit = 50, sort = 'ctime', page = 1}) {
         return await findAllProduct({limit, sort, page, select: ['product_name', 'product_price', 'product_image']})
@@ -86,10 +92,6 @@ class ProductFactory {
 
     static async findProduct({product_id}) {
         return await findProduct({product_id, unSelect: ['__v']})
-
-    }
-
-    static async updateProduct({product_shop, limit = 50, skip = 0}) {
 
     }
 
@@ -118,8 +120,12 @@ class Product {
     }
 
     // create new product
-    async createProduct(product_id) {
-        return product.create({...this, _id: product_id});
+    async createProduct(productId) {
+        return await product.create({...this, _id: productId});
+    }
+
+    async updateProduct(productId, payload) {
+        return await updateProductById({productId, payload, model: product})
     }
 }
 
@@ -136,6 +142,20 @@ class Clothing extends Product {
 
         return newProduct;
     }
+
+    async updateProduct(productId) {
+        // Remove attr has null and undefined
+        const objectParams = removeUndefined(this)
+        console.log("updateNestedObjectParser::", updateNestedObjectParser(objectParams))
+
+        // Where to check for update
+        if(objectParams.product_attributes) {
+            // Update Child
+            await updateProductById({productId, payload: updateNestedObjectParser(objectParams.product_attributes), model: clothing})
+        }
+
+        return await super.updateProduct(productId, updateNestedObjectParser(objectParams))
+    }
 }
 
 class Electronics extends Product {
@@ -149,6 +169,19 @@ class Electronics extends Product {
         if (!newProduct) throw new BadRequestError('Product not created');
 
         return newProduct;
+    }
+
+    async updateProduct(productId) {
+        // Remove attr has null and undefined
+        const objectParams = removeUndefined(this)
+
+        // Where to check for update
+        if(objectParams.product_attributes) {
+            // Update Child
+            await updateProductById({productId, payload: updateNestedObjectParser(objectParams.product_attributes), model: electronics})
+        }
+
+        return await super.updateProduct(productId, updateNestedObjectParser(objectParams))
     }
 }
 
