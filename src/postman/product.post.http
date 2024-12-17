@@ -15,16 +15,16 @@ x-client-id: 67550c9df31e05bb72690e5f
 authorization: {{accessToken}}
 
 {
-  "product_name": "Cotton T-Shirt 3",
-  "product_price": 19.99,
+  "product_name": "T-Shirt 8",
+  "product_price": 200.99,
   "product_description": "A comfortable cotton T-shirt, perfect for everyday wear.",
   "product_image": "https://example.com/images/cotton-tshirt.jpg",
-  "product_quantity": 100,
+  "product_quantity": 200,
   "product_type": "Clothing",
   "product_attributes": {
-    "branch": "Uniqlo",
-    "size": "M",
-    "color": "White",
+    "branch": "Adidas",
+    "size": "XL",
+    "color": "Black",
     "material": "100% Cotton"
   },
   "product_ratingsAverage": 4.7,
