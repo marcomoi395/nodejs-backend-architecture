@@ -64,12 +64,13 @@ const searchProductByUser = async ({keyword}) => {
     return result
 }
 
-const findAllProduct = async (limit, sort, page, select) => {
+const findAllProduct = async ({limit, sort, page, select, filter}) => {
     const skip = (page - 1) * limit
     const sortBy = sort === 'ctime' ? {_id: -1} : {_id: 1}
-    const products = await product.find({isPublished: true}).limit(limit).sort(sortBy).skip(skip).select(getSelectData(select)).lean()
-
-    return products
+    return await product.find({
+        ...filter,
+        isPublished: true
+    }).limit(limit).sort(sortBy).skip(skip).select(getSelectData(select)).lean()
 }
 
 const findProduct = async ({product_id, unSelect}) =>

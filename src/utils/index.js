@@ -1,6 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
+const {Types} = require('mongoose');
 const crypto = require('node:crypto');
 
 const getInfoData = ({filed = [], object = {}}) => {
@@ -64,11 +65,14 @@ const updateNestedObjectParser = (obj) => {
     return final;
 };
 
+const convertToObjectId = id => Types.ObjectId(id)
+
 module.exports = {
     getInfoData,
     getPrivateAndPublicKey,
     getSelectData,
     unGetSelectData,
     removeUndefined,
-    updateNestedObjectParser
+    updateNestedObjectParser,
+    convertToObjectId
 };
