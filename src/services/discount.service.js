@@ -17,17 +17,11 @@ const {findAllProduct} = require("../models/repositories/product.repo");
 const {
     findAllDiscountCodeUnSelect,
     findAllDiscountCodeSelect,
-    updateDiscount
+    updateDiscount,
+    checkDiscountExist
 } = require("../models/repositories/discount.repo");
 
 class DiscountService {
-
-    // Check discount code exist
-    static async hasDiscountCode(code, shopId) {
-        return await discount.findOne({
-            discount_code: code, discount_shopId: convertToObjectId(shopId)
-        }).lean()
-    }
 
     // Generate discount code
     static async createDiscountCode(payload) {
@@ -54,7 +48,11 @@ class DiscountService {
         if (new Date(start_date) > new Date(end_date)) throw new BadRequestError('Start date must be before end date')
 
         // Create index for discount code
-        const foundDiscount = await DiscountService.hasDiscountCode(code, shopId)
+        const filter = {
+            discount_code: code,
+            discount_shopId: convertToObjectId(shopId)
+        }
+        const foundDiscount = await checkDiscountExist({filter, model: discount})
 
         if (foundDiscount && foundDiscount.discount_is_active) {
             throw new BadRequestError('Discount code already exists')
@@ -79,7 +77,6 @@ class DiscountService {
         })
     }
 
-
     static async updateDiscount({code, shopId, payload}) {
         // Remove attr has null and undefined
         const objectParams = removeUndefined(this)
@@ -91,7 +88,12 @@ class DiscountService {
 
     static async getAllDiscountCodesAvailableWithProduct({code, shopId, userID, limit, page}) {
         // create index for discount code
-        const foundDiscount = await DiscountService.hasDiscountCode(code, shopId)
+        const filter = {
+            discount_code: code,
+            discount_shopId: convertToObjectId(shopId)
+        }
+        const foundDiscount = await checkDiscountExist({filter, model: discount})
+
         if (!foundDiscount || !foundDiscount.discount_is_active) throw new BadRequestError('Discount code does not exist')
 
         const {discount_apply_to, discount_product_ids} = foundDiscount
@@ -134,5 +136,7 @@ class DiscountService {
             model: discount
         })
     }
+
+
 }
 

@@ -1,6 +1,7 @@
 'use strict'
 
 import {convertToObjectId, getSelectData, unGetSelectData} from "../../utils";
+import discount from "../discount.model";
 
 const findAllDiscountCodeUnSelect = async ({limit = 50, page = 1, sort = 'ctime', filter, unSelect, model}) => {
     const skip = (page - 1) * limit
@@ -24,8 +25,13 @@ const findAllDiscountCodeSelect = async ({limit = 50, page = 1, sort = 'ctime', 
 const updateDiscount = async ({code, shopId , payload, isNew = true, model}) =>
     await model.findByIdAndUpdate({discount_code: code, discount_shopId: convertToObjectId(shopId)}, {$set: payload}, {new: isNew})
 
+const checkDiscountExist = async ({filter, model}) => {
+    return await model.findOne(filter).lean()
+}
+
 module.exports = {
     findAllDiscountCodeUnSelect,
     findAllDiscountCodeSelect,
-    updateDiscount
+    updateDiscount,
+    checkDiscountExist
 }
