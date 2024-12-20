@@ -6,12 +6,12 @@ const productController = require('../../controllers/product.controller');
 const asyncHandler = require('../../helper/asyncHandler');
 const { authentication } = require('../../auth/authUtils');
 
-// Authentication
+
 router.get('/search', asyncHandler(productController.getAllListSearchProduct));
 router.get('', asyncHandler(productController.findAllProduct));
 router.get('/:id', asyncHandler(productController.findProduct));
 
-
+// Authentication
 router.use(authentication);
 
 router.post('/add', asyncHandler(productController.createProduct));

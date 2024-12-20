@@ -73,13 +73,13 @@ const findAllProduct = async ({limit, sort, page, select, filter}) => {
     }).limit(limit).sort(sortBy).skip(skip).select(getSelectData(select)).lean()
 }
 
-const findProduct = async ({product_id, unSelect}) =>
-    await product.find({_id: product_id, isPublished: true}).select(unGetSelectData(unSelect)).lean()
+const findProducts = async ({filter, unSelect}) =>
+    await product.find(filter).select(unGetSelectData(unSelect)).lean()
 
 const updateProductById = async ({productId, payload, isNew = true, model}) =>
     await model.findByIdAndUpdate(productId, {$set: payload}, {new: isNew})
 
 
 module.exports = {
-    findAllDraftsForShop, publishProduct, findAllPublishedForShop, unPublishProduct, searchProductByUser, findAllProduct, findProduct, updateProductById
+    findAllDraftsForShop, publishProduct, findAllPublishedForShop, unPublishProduct, searchProductByUser, findAllProduct, findProducts, updateProductById
 }

@@ -43,7 +43,6 @@ const discountSchema = new Schema({
     },
     discount_used_count: {
         type: Number,
-        required: true,
     },
     discount_users_used: {
         type: Array,

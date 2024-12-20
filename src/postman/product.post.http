@@ -15,8 +15,8 @@ x-client-id: 67550c9df31e05bb72690e5f
 authorization: {{accessToken}}
 
 {
-  "product_name": "T-Shirt 8",
-  "product_price": 200.99,
+  "product_name": "T-Shirt 10",
+  "product_price": 15.99,
   "product_description": "A comfortable cotton T-shirt, perfect for everyday wear.",
   "product_image": "https://example.com/images/cotton-tshirt.jpg",
   "product_quantity": 200,
@@ -84,7 +84,7 @@ authorization: {{accessToken}}
     request.variables.set("accessToken", client.global.get("accessToken"))
 %}
 
-PATCH {{url_dev}}/product/publish/{{id}}
+PATCH {{url_dev}}/product/publish/6765861caf5199aa82702d4a
 x-api-key: {{API_KEY}}
 x-client-id: 67550c9df31e05bb72690e5f
 authorization: {{accessToken}}

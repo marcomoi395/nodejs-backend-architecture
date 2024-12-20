@@ -1,0 +1,110 @@
+@url_dev=http://localhost:3000/v1/api/discount
+@API_KEY=c32cb1e215cf74d2f0ceba899a19f464d3a1b9a1e3b2ec2fb3154426b8652da3f92c41e83a247bd28bdb87db68169fe03cfd9933baf7a77e1fd914f48fc24887
+@id=6755a8b537cbabf7227e49b8
+
+### Create discount code
+< {%
+    request.variables.set("accessToken", client.global.get("accessToken"))
+%}
+
+
+POST {{url_dev}}
+Content-Type: application/json
+x-api-key: {{API_KEY}}
+x-client-id: 67550c9df31e05bb72690e5f
+authorization: {{accessToken}}
+
+{
+  "name": "Summer Sale Discount",
+  "description": "Get amazing discounts during the summer sale.",
+  "type": "fixed_amount",
+  "value": 50,
+  "code": "SUMM-12345",
+  "start_date": "2024-06-01T00:00:00.000Z",
+  "end_date": "2025-06-30T23:59:59.000Z",
+  "max_usage": 200,
+  "used_count": 30,
+  "max_uses_per_user": 3,
+  "min_order_amount": 100,
+  "is_active": true,
+  "apply_to": "all_products"
+}
+
+### Update discount code
+< {%
+    request.variables.set("accessToken", client.global.get("accessToken"))
+%}
+
+
+PATCH {{url_dev}}/update/6765413f44040f18593b3dfe
+Content-Type: application/json
+x-api-key: {{API_KEY}}
+x-client-id: 67550c9df31e05bb72690e5f
+authorization: {{accessToken}}
+
+{
+  "discount_name": "Summer Sale Discount 2",
+  "discount_value": 100
+}
+
+
+
+### Get All Discount Codes
+< {%
+    request.variables.set("accessToken", client.global.get("accessToken"))
+%}
+
+
+GET {{url_dev}}/
+Content-Type: application/json
+x-api-key: {{API_KEY}}
+x-client-id: 67550c9df31e05bb72690e5f
+authorization: {{accessToken}}
+
+
+
+### Get All Discount Codes
+< {%
+    request.variables.set("accessToken", client.global.get("accessToken"))
+%}
+
+
+GET {{url_dev}}/list_product_code?code=SUMM-12345
+Content-Type: application/json
+x-api-key: {{API_KEY}}
+
+
+### Get All Discount Codes
+< {%
+    request.variables.set("accessToken", client.global.get("accessToken"))
+%}
+
+
+GET {{url_dev}}/amount
+Content-Type: application/json
+x-api-key: {{API_KEY}}
+x-client-id: 67550c9df31e05bb72690e5f
+authorization: {{accessToken}}
+
+{
+  "code": "SUMM-12345",
+  "products": [
+    {
+      "id": "67618df84341317d1f45ec0e",
+      "name": "T-Shirt 8",
+      "quantity": 3
+    },
+    {
+      "id": "6765860baf5199aa82702d42",
+      "name": "T-Shirt 9",
+      "quantity": 1
+    },
+    {
+      "id": "6765861caf5199aa82702d4a",
+      "name": "T-Shirt 10",
+      "quantity": 1
+    }
+  ]
+}
+
+

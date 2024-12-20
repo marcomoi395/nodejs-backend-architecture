@@ -5,7 +5,7 @@ const {
     BadRequestError, InternalServerError, AuthFailureError, ForbiddenError,
 } = require('../core/error.response');
 const {
-    findAllDraftsForShop, findAllPublishedForShop, publishProduct, unPublishProduct, searchProductByUser, findAllProduct, findProduct,
+    findAllDraftsForShop, findAllPublishedForShop, publishProduct, unPublishProduct, searchProductByUser, findAllProduct, findProducts,
     updateProductById
 } = require('../models/repositories/product.repo')
 const {Types} = require('mongoose');
@@ -92,7 +92,7 @@ class ProductFactory {
     }
 
     static async findProduct({product_id}) {
-        return await findProduct({product_id, unSelect: ['__v']})
+        return await findProducts({filter: {_id: product_id, isPublished: true}, unSelect: ['__v']})
 
     }
 
