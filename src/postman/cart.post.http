@@ -1,0 +1,62 @@
+@url_dev=http://localhost:3000/v1/api/cart
+@API_KEY=c32cb1e215cf74d2f0ceba899a19f464d3a1b9a1e3b2ec2fb3154426b8652da3f92c41e83a247bd28bdb87db68169fe03cfd9933baf7a77e1fd914f48fc24887
+@id=6755a8b537cbabf7227e49b8
+
+#router.get('/', asyncHandler(cartController.getListUserCart));
+#router.post('/', asyncHandler(cartController.addProductToCart));
+#router.post('/', asyncHandler(cartController.updateProductInCart));
+#router.delete('/', asyncHandler(cartController.deleteProductFromUserCart));
+
+### addProductToCart
+
+POST {{url_dev}}
+Content-Type: application/json
+x-api-key: {{API_KEY}}
+
+{
+  "userId": 1001,
+  "product": {
+    "productId": "67618df84341317d1f45ec0e",
+    "shopId": "67550c9df31e05bb72690e5f",
+    "quantity": 4,
+    "name": "T-Shirt 8",
+    "price": 200.99
+  }
+}
+
+### updateProductInCart
+
+POST {{url_dev}}/update
+Content-Type: application/json
+x-api-key: {{API_KEY}}
+
+{
+  "userId": 1001,
+  "shop_order_ids": {
+    "shopId": "67550c9df31e05bb72690e5f",
+    "item_products": {
+      "quantity": 0,
+      "price": 200.99,
+      "old_quantity": 0,
+      "productId": "67618df84341317d1f45ec0e"
+    },
+    "version": ""
+  }
+}
+
+### deleteProductFromUserCart
+
+DELETE {{url_dev}}
+Content-Type: application/json
+x-api-key: {{API_KEY}}
+
+{
+  "userId": "1001",
+  "productId": "67618df84341317d1f45ec0e"
+}
+
+### getListUserCart
+GET {{url_dev}}?userId=1001
+Content-Type: application/json
+x-api-key: {{API_KEY}}
+

@@ -4,6 +4,7 @@ const {product, electric, clothing} = require('../product.model');
 const shopModel = require('../shop.model');
 const {Types} = require("mongoose");
 const {getSelectData, unGetSelectData} = require("../../utils");
+const cart = require("../cart.model");
 
 const queryProduct = async ({query, limit, skip}) => await product
     .find(query)
@@ -73,12 +74,11 @@ const findAllProduct = async ({limit, sort, page, select, filter}) => {
     }).limit(limit).sort(sortBy).skip(skip).select(getSelectData(select)).lean()
 }
 
-const findProducts = async ({filter, unSelect}) =>
+const findProducts = async ({filter, unSelect = []}) =>
     await product.find(filter).select(unGetSelectData(unSelect)).lean()
 
 const updateProductById = async ({productId, payload, isNew = true, model}) =>
     await model.findByIdAndUpdate(productId, {$set: payload}, {new: isNew})
-
 
 module.exports = {
     findAllDraftsForShop, publishProduct, findAllPublishedForShop, unPublishProduct, searchProductByUser, findAllProduct, findProducts, updateProductById
