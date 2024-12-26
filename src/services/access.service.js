@@ -41,7 +41,7 @@ class AccessService {
                 'Something went wrong, please login again'
             );
         }
-z
+
         if (keyStore.refreshToken !== refreshToken) {
             throw new AuthFailureError('Shop not register');
         }

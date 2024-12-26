@@ -87,7 +87,6 @@ class DiscountService {
             }
 
             newProductsIds = newIds.map((item) => item._id);
-            console.log('product_ids::', newProductsIds);
         }
 
         // Create discount code
@@ -212,15 +211,10 @@ class DiscountService {
         )
             throw new BadRequestError('Discount code has expired');
 
-        const ids = products.map((item) => item.id);
-        console.log('ids1::', ids);
-
+        const ids = products.map((item) => item.product_id);
         if (discount_apply_to === 'specific_products') {
             ids = ids.map((item) => item.incluedes(discount_product_ids));
         }
-
-        console.log('ids2::', ids);
-
         const foundProducts = await findProducts({
             filter: { _id: { $in: ids }, isPublished: true },
             unSelect: ['__v'],
@@ -231,9 +225,9 @@ class DiscountService {
             // Get total
             totalOrder = foundProducts.reduce((acc, product) => {
                 const quantity = products.find(
-                    (item) => item.id === product._id.toString()
+                    (item) => item.product_id === product._id.toString()
                 ).quantity;
-                if (product.product_quantity < quantity)
+                if (product.quantity < quantity)
                     throw new BadRequestError(
                         'The quantity of products in stock does not satisfy the requirement.'
                     );
