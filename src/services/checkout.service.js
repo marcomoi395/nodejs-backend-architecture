@@ -6,6 +6,8 @@ const {
     checkProductByServer,
 } = require('../models/repositories/cart.repo.js');
 const { getDiscountAmount } = require('./discount.service.js');
+const { acquireLock, releaseLock } = require('./redis.service.js');
+const order = require('../models/order.model.js');
 
 class CheckoutService {
     /*
@@ -92,8 +94,6 @@ class CheckoutService {
                 item.quantity = quantity;
             });
 
-            console.log('checkProductServer', checkProductServer);
-
             const checkoutPrice = checkProductServer.reduce((acc, product) => {
                 return acc + product.price * product.quantity;
             }, 0);
@@ -133,6 +133,61 @@ class CheckoutService {
             checkout_order: checkoutOrder,
         };
     }
+
+    static async orderByUser({
+        shop_order_ids,
+        cardId,
+        userId,
+        user_address = {},
+        user_payment = {},
+    }) {
+        const { shop_order_ids_new, checkout_order } =
+            CheckoutService.checkoutReview({
+                cardId,
+                userId,
+                shop_order_ids,
+            });
+
+        // Check for products existence
+        // Get new array Products
+
+        const products = shop_order_ids_new.flatMap(
+            (item) => item.item_products
+        );
+
+        console.log('[1]::', products);
+        const acquireProducts = [];
+        for (let i = 0; i < products.length; i++) {
+            const { product_id, quantity } = products[i];
+            const keyLock = await acquireLock(productsId, quantity, cartId);
+            acquireProducts.push(keyLock ? true : false);
+            if (keyLock) {
+                await releaseLock(keyLock);
+            }
+        }
+
+        // Check if a product is out of stock
+        if (acquireProducts.includes(false)) {
+            throw new BadRequestError(
+                'Product has changed slightly, please try again'
+            );
+        }
+
+        const newOrder = await order.create({
+            order_userId: userId,
+            order_checkout: checkout_order,
+            order_shipping: user_address,
+            order_payment: user_payment,
+            order_products: shop_order_ids_new,
+        });
+
+        return newOrder;
+    }
+
+    static async getOrdersByUser() {}
+    static async getOneOrderByUser() {}
+    static async cancelOrderByUser() {}
+    static async updateOrderStatusByUser() {}
 }
 
 module.exports = CheckoutService;
